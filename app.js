@@ -1,5 +1,8 @@
 'use strict';
 
+// FOR DEBUG ONLY. REMOVE ON RELEASE
+document.getElementById('description').classList.remove('hidden');
+
 const SIZE = 100;
 const SEED = 10;
 const CELLS = 2; // each side is divided by CELLS (CELLS=2 means we have 4 cells etc)
@@ -13,6 +16,12 @@ const PAUSE_BUTTON_TEXT = 'Pause';
 
 const BUTTON_BACK_FORWARD_STEP = 200;
 const SAVE_CANVAS_SIZE = 1000;
+
+const TEXT_FONT = 'bold 50px Arial'
+const TEXT_MARGIN = 20;
+const TEXT_COLOR = 'white';
+const TEXT_STROKE_COLOR = 'black';
+const TEXT_STROKE_WIDTH = 10;
 
 class SeededRandom {
     constructor(seed) {
@@ -170,7 +179,7 @@ function fillAll() {
 fillAll();
 
 let timePlaying = 0;
-let timeStopped = 5000; // should be 0
+let timeStopped = 0;
 let timeWhenStopped = -1;
 let playing = true;
 
@@ -270,21 +279,20 @@ function createCanvasToCopyOrDownload() {
     {
         // Draw "some text" at the bottom right
         const text = '#808080';
-        const fontSize = 50; // Adjust the size as needed
-        newCtx.font = `bold ${fontSize}px Arial`;
+        newCtx.font = TEXT_FONT
         newCtx.textAlign = 'right';
         newCtx.textBaseline = 'bottom';
 
-        const xPos = SAVE_CANVAS_SIZE - 20; // 20 pixels from the right edge
-        const yPos = SAVE_CANVAS_SIZE - 20; // 20 pixels from the bottom edge
+        const xPos = SAVE_CANVAS_SIZE - TEXT_MARGIN; // 20 pixels from the right edge
+        const yPos = SAVE_CANVAS_SIZE - TEXT_MARGIN; // 20 pixels from the bottom edge
 
         // Draw black stroke first
-        newCtx.strokeStyle = 'black';
-        newCtx.lineWidth = 10;
+        newCtx.strokeStyle = TEXT_STROKE_COLOR;
+        newCtx.lineWidth = TEXT_STROKE_WIDTH;
         newCtx.strokeText(text, xPos, yPos);
 
         // Draw white fill on top
-        newCtx.fillStyle = 'white';
+        newCtx.fillStyle = TEXT_COLOR;
         newCtx.fillText(text, xPos, yPos);
     }
 
