@@ -1,8 +1,8 @@
 'use strict';
 
 const SIZE = 500;
-const SEED = 10;
-const CELLS = 1; // each side is divided by CELLS (CELLS=2 means we have 4 cells etc)
+const SEED = 30;
+const CELLS = 4; // each side is divided by CELLS (CELLS=2 means we have 4 cells etc)
 
 class SeededRandom {
     constructor(seed) {
@@ -37,7 +37,8 @@ function map(num, frombottom, fromtop, tobottom, totop) {
 function smoothstep(x) {
     if (x < 0) return 0;
     if (x > 1) return 1;
-    return 3 * x * x - 2 * x * x * x;
+    // return 3 * x * x - 2 * x * x * x;
+    return 6 * Math.pow(x, 5) - 15 * Math.pow(x, 4) + 10 * Math.pow(x, 3);
 }
 function interpolate(a, b, x) {
     return a + smoothstep(x) * (b - a);
@@ -45,89 +46,110 @@ function interpolate(a, b, x) {
 
 
 // Calculate grid vectors
-const gridAngles = [45, 135, 135, 225].map(x => x * Math.PI / 180);
-// for(let i = 0; i < (CELLS + 1) * (CELLS + 1); i++) {
-//     const angleDeg = 360 * random.random();
-//     const angleRad = angleDeg * Math.PI / 180;
-//     gridAngles.push(angleRad);
-// }
-//todo calculate them for real
-
-
-function fillCell(startX, startY, cellSize, gridVectors) {
-
+const gridAngles = [];
+for(let i = 0; i < (CELLS + 1) * (CELLS + 1); i++) {
+    const angleDeg = 360 * random.random();
+    const angleRad = angleDeg * Math.PI / 180;
+    gridAngles.push(angleRad);
 }
 
-// Calculate each pixel
-for(let i = 0; i < SIZE; i++) {
-    for(let j = 0; j < SIZE; j++) {
+// gridVectors are topLeft, topRight, bottomLeft, bottomRrght
+function fillCell(startX, startY, gridVectors) {
+    const cellSize = SIZE / CELLS;
+    for(let i = 0; i < cellSize; i++) {
+        for(let j = 0; j < cellSize; j++) {
 
-        const x = i / SIZE;
-        const y = -j / SIZE;
+            const x = i / cellSize;
+            const y = j / cellSize;
 
-        let dotProductTopLeft;
-        let dotProductTopRight;
-        let dotProductBottomLeft;
-        let dotProductBottomRight;
+            let dotProductTopLeft;
+            let dotProductTopRight;
+            let dotProductBottomLeft;
+            let dotProductBottomRight;
 
-        // top left
-        {
-            const vectorX = x;
-            const vectorY = -y;
-    
-            const gradienxX = Math.cos(gridAngles[0]);
-            const gradienxY = Math.sin(gridAngles[0]);
+            // top left
+            {
+                const vectorX = x;
+                const vectorY = -y;
+        
+                const gradientX = Math.cos(gridVectors[0]);
+                const gradientY = Math.sin(gridVectors[0]);
 
-            dotProductTopLeft = vectorX * gradienxX + vectorY * gradienxY;
+                dotProductTopLeft = vectorX * gradientX + vectorY * gradientY;
+            }
+
+            // top right
+            {
+                const vectorX = x - 1;
+                const vectorY = -y;
+        
+                const gradientX = Math.cos(gridVectors[1]);
+                const gradientY = Math.sin(gridVectors[1]);
+
+                dotProductTopRight = vectorX * gradientX + vectorY * gradientY;
+            }
+
+            // bottom left
+            {
+                const vectorX = x;
+                const vectorY = 1 - y;
+        
+                const gradientX = Math.cos(gridVectors[2]);
+                const gradientY = Math.sin(gridVectors[2]);
+
+                dotProductBottomLeft = vectorX * gradientX + vectorY * gradientY;
+            }
+
+            // bottom right
+            {
+                const vectorX = x - 1;
+                const vectorY = 1 - y;
+        
+                const gradientX = Math.cos(gridVectors[3]);
+                const gradientY = Math.sin(gridVectors[3]);
+
+                dotProductBottomRight = vectorX * gradientX + vectorY * gradientY;
+            }
+
+            const topInterpolated = interpolate(dotProductTopLeft, dotProductTopRight, x);
+            const bottomInterpolated = interpolate(dotProductBottomLeft, dotProductBottomRight, x);
+
+            const interpolated = interpolate(topInterpolated, bottomInterpolated, y);
+            // const interpolated = interpolate(topInterpolated, bottomInterpolated, y);
+
+            const colorValue = Math.round(Math.abs(interpolated) * 255);
+            // const colorValue = Math.round((interpolated + 1) / 2 * 255);
+            // const colorValue = Math.round((interpolated + 1) / 2 * 255);
+            // console.log(interpolated);
+
+            context.fillStyle = `rgb(${colorValue}, ${colorValue}, ${colorValue})`;
+            context.fillRect(startX + i, startY + j, 1, 1);
         }
-
-        // top right
-        {
-            const vectorX = x - 1;
-            const vectorY = -y;
-    
-            const gradienxX = Math.cos(gridAngles[1]);
-            const gradienxY = Math.sin(gridAngles[1]);
-
-            dotProductTopRight = vectorX * gradienxX + vectorY * gradienxY;
-        }
-
-        // bottom left
-        {
-            const vectorX = x;
-            const vectorY = 1 - y;
-    
-            const gradienxX = Math.cos(gridAngles[2]);
-            const gradienxY = Math.sin(gridAngles[2]);
-
-            dotProductBottomLeft = vectorX * gradienxX + vectorY * gradienxY;
-        }
-
-        // bottom right
-        {
-            const vectorX = x - 1;
-            const vectorY = 1 - y;
-    
-            const gradienxX = Math.cos(gridAngles[3]);
-            const gradienxY = Math.sin(gridAngles[3]);
-
-            dotProductBottomRight = vectorX * gradienxX + vectorY * gradienxY;
-        }
-
-        const topInterpolated = interpolate(dotProductTopLeft, dotProductTopRight, x);
-        const bottomInterpolated = interpolate(dotProductBottomLeft, dotProductBottomRight, x);
-
-        const interpolated = interpolate(topInterpolated, bottomInterpolated, y);
-
-        const colorValue = Math.round(interpolated * 255);
-        // console.log(interpolated);
-
-        context.fillStyle = `rgb(${colorValue}, ${colorValue}, ${colorValue})`;
-        context.fillRect(i, j, 1, 1);
     }
 }
 
+function fillAll() {
+    const cellSize = SIZE / CELLS;
+    for (let i = 0; i < CELLS; i++) {
+        for (let j = 0; j < CELLS; j++) {
+            const startX = i * cellSize;
+            const startY = j * cellSize;
 
-setTimeout(() => {
-    // window.location.reload();
-}, 1000);
+            const topLeftAngleIndex = i * (CELLS + 1) + j;
+            const topRightAngleIndex = topLeftAngleIndex + 1;
+            const bottomLeftAngleIndex = topLeftAngleIndex + 4;
+            const bottomRightAngleIndex = bottomLeftAngleIndex + 1;
+
+            fillCell(startX, startY, [topLeftAngleIndex, topRightAngleIndex, bottomLeftAngleIndex, bottomRightAngleIndex]);
+            console.log([topLeftAngleIndex, topRightAngleIndex, bottomLeftAngleIndex, bottomRightAngleIndex]);
+        }
+    }
+}
+fillAll();
+
+
+
+
+// setTimeout(() => {
+//     window.location.reload();
+// }, 1000);
