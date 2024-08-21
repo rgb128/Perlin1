@@ -8,6 +8,11 @@ const HSL_DATA = '96%, 47%';
 const MIN_WAIT_SEC = 1; // 10
 const MAX_WAIT_SEC = 5; // 20
 
+const PLAY_BUTTON_TEXT = 'Play';
+const PAUSE_BUTTON_TEXT = 'Pause';
+
+const BUTTON_BACK_FORWARD_STEP = 200;
+
 class SeededRandom {
     constructor(seed) {
         this.seed = seed;
@@ -165,6 +170,7 @@ fillAll();
 
 let timePlaying = 0;
 let timeStopped = 0;
+let timeWhenStopped = -1;
 let playing = true;
 
 let previousAnimation = 0;
@@ -174,15 +180,13 @@ function onAnimationFrame(x) {
 
     if (playing) {
         timePlaying += delta;
-        for (let i = 0; i < gridAngles.length; i++) {
-            // gridAngles[i] += gridAnglesSpeedMultiplier[i] * delta * SPEED;
-            gridAngles[i] = gridAnglesStart[i] + gridAnglesSpeedMultiplier[i] * timePlaying * SPEED;
-        }
-        fillAll();
+        fillAllDependingOnTimePlaying();
     } else {
         timeStopped += delta;
-        if (timeStopped > waitTimeMs) {
+        if (timeStopped > waitTimeMs && timeWhenStopped < 0) {
+            timeWhenStopped = timeStopped;
             document.getElementById('description').classList.remove('hidden');
+            window.scrollTo(0, document.body.scrollHeight);
         }
     }
     
@@ -190,12 +194,21 @@ function onAnimationFrame(x) {
 }
 window.requestAnimationFrame(onAnimationFrame);
 
+function fillAllDependingOnTimePlaying() {
+    for (let i = 0; i < gridAngles.length; i++) {
+        // gridAngles[i] += gridAnglesSpeedMultiplier[i] * delta * SPEED;
+        gridAngles[i] = gridAnglesStart[i] + gridAnglesSpeedMultiplier[i] * timePlaying * SPEED;
+    }
+    fillAll();
+}
 
 function pausePlaying() {
     playing = false;
+    document.getElementById('play-pause').innerText = PLAY_BUTTON_TEXT;
 }
 function resumePlaying() {
     playing = true;
+    document.getElementById('play-pause').innerText = PAUSE_BUTTON_TEXT;
 }
 
 canvas.onmousedown = _ => {
@@ -211,4 +224,26 @@ if (canvas.ontouchend) canvas.ontouchend = _ => {
     resumePlaying();
 }
 
+resumePlaying();
+
+document.getElementById('play-pause').onclick = _ => {
+    if (playing) pausePlaying();
+    else resumePlaying();
+}
+document.getElementById('play-back').onclick = _ => {
+    timePlaying -= BUTTON_BACK_FORWARD_STEP;
+    fillAllDependingOnTimePlaying();
+}
+document.getElementById('play-forward').onclick = _ => {
+    timePlaying += BUTTON_BACK_FORWARD_STEP;
+    fillAllDependingOnTimePlaying();
+}
+document.getElementById('play-replay').onclick = _ => {
+    timePlaying = 0;
+    fillAllDependingOnTimePlaying();
+}
+document.getElementById('play-time-i-stopped').onclick = _ => {
+    timePlaying = timeWhenStopped;
+    fillAllDependingOnTimePlaying();
+}
 

@@ -2,6 +2,11 @@
     margin: 0px;
     padding: 0px;
     box-sizing: border-box;
+    user-select: none;
+}
+
+html {
+    scroll-behavior: smooth;
 }
 
 .hidden {
@@ -20,4 +25,9 @@ div#container {
 #canvas {
     width: max(100vw, 100vh);
     height: max(100vw, 100vh);
+}
+
+button {
+    padding: 10px;
+    font-size: 50px;
 }
