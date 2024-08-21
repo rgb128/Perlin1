@@ -2,7 +2,8 @@
 
 const SIZE = 500;
 const SEED = 30;
-const CELLS = 10; // each side is divided by CELLS (CELLS=2 means we have 4 cells etc)
+const CELLS = 5; // each side is divided by CELLS (CELLS=2 means we have 4 cells etc)
+const SPEED = .0001;
 
 class SeededRandom {
     constructor(seed) {
@@ -49,9 +50,12 @@ function interpolate(a, b, x) {
 
 // Calculate grid vectors
 const gridAngles = [];
+const gridAnglesSpeedMultiplier = [];
 for(let i = 0; i < (CELLS + 1) * (CELLS + 1); i++) {
     gridAngles.push(2 * Math.PI * random.random());
+    gridAnglesSpeedMultiplier.push(random.random());
 }
+
 
 
 // gridVectors are topLeft, topRight, bottomLeft, bottomRight
@@ -122,9 +126,10 @@ function fillCell(startX, startY, gridVectors) {
 
             const interpolated = interpolate(topInterpolated, bottomInterpolated, y);
 
-            const colorValue = Math.round((interpolated / 2 + .5) * 255);
+            const colorValue = Math.round((interpolated / 2 + .5) * 360);
 
-            context.fillStyle = `rgb(${colorValue}, ${colorValue}, ${colorValue})`;
+            // context.fillStyle = `rgb(${colorValue}, ${colorValue}, ${colorValue})`;
+            context.fillStyle = `hsl(${colorValue}, 81%, 81%)`;
             context.fillRect(startX + i, startY + j, 1, 1);
         }
     }
@@ -153,8 +158,22 @@ function fillAll() {
 }
 fillAll();
 
+let previousAnimation = 0;
+function onAnimationFrame(x) {
+    const delta = x - previousAnimation;
+    previousAnimation = x;
+    
+    for (let i = 0; i < gridAngles.length; i++) {
+        gridAngles[i] += gridAnglesSpeedMultiplier[i] * delta * SPEED;
+    }
 
+    fillAll();
 
+    // if (previousAnimation < 10_000) window.requestAnimationFrame(onAnimationFrame);
+    // else console.log('f');
+    window.requestAnimationFrame(onAnimationFrame);
+}
+window.requestAnimationFrame(onAnimationFrame);
 
 // setTimeout(() => {
 //     window.location.reload();
