@@ -23,6 +23,8 @@ const TEXT_COLOR = 'white';
 const TEXT_STROKE_COLOR = 'black';
 const TEXT_STROKE_WIDTH = 10;
 
+const BLUR = 100;
+
 class SeededRandom {
     constructor(seed) {
         this.seed = seed;
@@ -41,9 +43,11 @@ class SeededRandom {
 const random = new SeededRandom(SEED);
 
 /** @type HTMLCanvasElement */ const canvas = document.getElementById('canvas');
+canvas.style.filter = `blur(${BLUR}px)`;
 const context = canvas.getContext('2d');
 canvas.width =  SIZE;
 canvas.height = SIZE;
+// context.filter = `blur(${BLUR}px)`;
 
 const waitTimeMs = map(random.random(), 0, 1, MIN_WAIT_SEC, MAX_WAIT_SEC) * 1000;
 console.log('waitTimeMs', waitTimeMs);
@@ -197,6 +201,7 @@ function onAnimationFrame(x) {
             timeWhenStopped = timeStopped;
             document.getElementById('description').classList.remove('hidden');
             window.scrollTo(0, document.body.scrollHeight);
+            playing = false;
         }
     }
     
@@ -266,9 +271,10 @@ function createCanvasToCopyOrDownload() {
     newCanvas.style.width = SAVE_CANVAS_SIZE + 'px';
     newCanvas.style.height = SAVE_CANVAS_SIZE + 'px';
     newCanvas.style.display = 'none';
-
+    
     const newCtx = newCanvas.getContext('2d');
-
+    newCtx.filter = `blur(${BLUR}px)`;
+    
     newCtx.drawImage(
         canvas, // Assuming this is the smaller canvas with size 100x100
         0, 0, SIZE, SIZE, // Source rectangle: start at (0,0), covering the entire small canvas

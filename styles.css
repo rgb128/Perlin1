@@ -25,6 +25,7 @@ div#container {
 #canvas {
     width: max(100vw, 100vh);
     height: max(100vw, 100vh);
+    /* filter: blur(100px); */
 }
 
 button {
