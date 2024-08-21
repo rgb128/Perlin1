@@ -2,7 +2,7 @@
 
 const SIZE = 500;
 const SEED = 30;
-const CELLS = 4; // each side is divided by CELLS (CELLS=2 means we have 4 cells etc)
+const CELLS = 5; // each side is divided by CELLS (CELLS=2 means we have 4 cells etc)
 
 class SeededRandom {
     constructor(seed) {
@@ -11,6 +11,7 @@ class SeededRandom {
 
     // Random function similar to Math.random(), but with a seed
     random() {
+        // return Math.random();
         // Use a simple linear congruential generator (LCG) formula
         // Constants are chosen based on the Numerical Recipes LCG
         this.seed = (this.seed * 1664525 + 1013904223) % 0x100000000;
@@ -41,6 +42,7 @@ function smoothstep(x) {
     return 6 * Math.pow(x, 5) - 15 * Math.pow(x, 4) + 10 * Math.pow(x, 3);
 }
 function interpolate(a, b, x) {
+    // return a + x * (b - a);
     return a + smoothstep(x) * (b - a);
 }
 
@@ -48,12 +50,14 @@ function interpolate(a, b, x) {
 // Calculate grid vectors
 const gridAngles = [];
 for(let i = 0; i < (CELLS + 1) * (CELLS + 1); i++) {
-    const angleDeg = 360 * random.random();
-    const angleRad = angleDeg * Math.PI / 180;
-    gridAngles.push(angleRad);
+    // const angleDeg = 360 * random.random();
+    // const angleRad = angleDeg * Math.PI / 180;
+    // gridAngles.push(angleRad);
+    gridAngles.push(2 * Math.PI * random.random());
 }
 
-// gridVectors are topLeft, topRight, bottomLeft, bottomRrght
+
+// gridVectors are topLeft, topRight, bottomLeft, bottomRight
 function fillCell(startX, startY, gridVectors) {
     const cellSize = SIZE / CELLS;
     for(let i = 0; i < cellSize; i++) {
@@ -62,15 +66,14 @@ function fillCell(startX, startY, gridVectors) {
             const x = i / cellSize;
             const y = j / cellSize;
 
-            let dotProductTopLeft;
-            let dotProductTopRight;
-            let dotProductBottomLeft;
-            let dotProductBottomRight;
+            let dotProductTopLeft, dotProductTopRight, dotProductBottomLeft, dotProductBottomRight;
 
             // top left
             {
                 const vectorX = x;
                 const vectorY = -y;
+
+                if (vectorX < 0 || vectorY > 0) console.error('top left');
         
                 const gradientX = Math.cos(gridVectors[0]);
                 const gradientY = Math.sin(gridVectors[0]);
@@ -82,6 +85,8 @@ function fillCell(startX, startY, gridVectors) {
             {
                 const vectorX = x - 1;
                 const vectorY = -y;
+
+                if (vectorX > 0 || vectorY > 0) console.error('top right');
         
                 const gradientX = Math.cos(gridVectors[1]);
                 const gradientY = Math.sin(gridVectors[1]);
@@ -93,6 +98,8 @@ function fillCell(startX, startY, gridVectors) {
             {
                 const vectorX = x;
                 const vectorY = 1 - y;
+
+                if (vectorX < 0 || vectorY < 0) console.error('bottom left');
         
                 const gradientX = Math.cos(gridVectors[2]);
                 const gradientY = Math.sin(gridVectors[2]);
@@ -104,6 +111,8 @@ function fillCell(startX, startY, gridVectors) {
             {
                 const vectorX = x - 1;
                 const vectorY = 1 - y;
+
+                if (vectorX > 0 || vectorY < 0) console.error('bottom right');
         
                 const gradientX = Math.cos(gridVectors[3]);
                 const gradientY = Math.sin(gridVectors[3]);
@@ -115,12 +124,10 @@ function fillCell(startX, startY, gridVectors) {
             const bottomInterpolated = interpolate(dotProductBottomLeft, dotProductBottomRight, x);
 
             const interpolated = interpolate(topInterpolated, bottomInterpolated, y);
-            // const interpolated = interpolate(topInterpolated, bottomInterpolated, y);
 
-            const colorValue = Math.round(Math.abs(interpolated) * 255);
-            // const colorValue = Math.round((interpolated + 1) / 2 * 255);
-            // const colorValue = Math.round((interpolated + 1) / 2 * 255);
-            // console.log(interpolated);
+            // const colorValue = Math.round(interpolated * 255);
+            const colorValue = Math.round((interpolated / 2 + .5) * 255);
+            // const colorValue = Math.round(Math.abs(interpolated) * 255);
 
             context.fillStyle = `rgb(${colorValue}, ${colorValue}, ${colorValue})`;
             context.fillRect(startX + i, startY + j, 1, 1);
@@ -137,11 +144,16 @@ function fillAll() {
 
             const topLeftAngleIndex = i * (CELLS + 1) + j;
             const topRightAngleIndex = topLeftAngleIndex + 1;
-            const bottomLeftAngleIndex = topLeftAngleIndex + 4;
+            const bottomLeftAngleIndex = topLeftAngleIndex + (CELLS + 1);
             const bottomRightAngleIndex = bottomLeftAngleIndex + 1;
 
-            fillCell(startX, startY, [topLeftAngleIndex, topRightAngleIndex, bottomLeftAngleIndex, bottomRightAngleIndex]);
-            console.log([topLeftAngleIndex, topRightAngleIndex, bottomLeftAngleIndex, bottomRightAngleIndex]);
+            fillCell(startX, startY, [
+                gridAngles[topLeftAngleIndex], 
+                gridAngles[topRightAngleIndex], 
+                gridAngles[bottomLeftAngleIndex], 
+                gridAngles[bottomRightAngleIndex],
+            ]);
+            // console.log([topLeftAngleIndex, topRightAngleIndex, bottomLeftAngleIndex, bottomRightAngleIndex]);
         }
     }
 }
