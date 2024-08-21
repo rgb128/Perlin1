@@ -63,7 +63,7 @@ const gridAnglesStart = [];
 const gridAnglesSpeedMultiplier = [];
 for(let i = 0; i < (CELLS + 1) * (CELLS + 1); i++) {
     gridAngles.push(2 * Math.PI * random.random());
-    gridAnglesStart.push(2 * Math.PI * random.random());
+    gridAnglesStart.push(gridAngles[i]);
     gridAnglesSpeedMultiplier.push(random.random());
 }
 
