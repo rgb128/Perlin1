@@ -1,9 +1,10 @@
 'use strict';
 
-const SIZE = 500;
-const SEED = 30;
-const CELLS = 5; // each side is divided by CELLS (CELLS=2 means we have 4 cells etc)
-const SPEED = .0001;
+const SIZE = 100;
+const SEED = 10;
+const CELLS = 2; // each side is divided by CELLS (CELLS=2 means we have 4 cells etc)
+const SPEED = .001;
+const HSL_DATA = '96%, 47%';
 
 class SeededRandom {
     constructor(seed) {
@@ -24,8 +25,6 @@ const random = new SeededRandom(SEED);
 
 /** @type HTMLCanvasElement */ const canvas = document.getElementById('canvas');
 const context = canvas.getContext('2d');
-canvas.style.width =  SIZE + 'px';
-canvas.style.height = SIZE + 'px';
 canvas.width =  SIZE;
 canvas.height = SIZE;
 
@@ -38,8 +37,8 @@ function map(num, frombottom, fromtop, tobottom, totop) {
 
 // fade function
 function smoothstep(x) {
-    // if (x < 0) return 0;
-    // if (x > 1) return 1;
+    if (x < 0) return 0;
+    if (x > 1) return 1;
     return 6 * Math.pow(x, 5) - 15 * Math.pow(x, 4) + 10 * Math.pow(x, 3);
 }
 function interpolate(a, b, x) {
@@ -50,9 +49,11 @@ function interpolate(a, b, x) {
 
 // Calculate grid vectors
 const gridAngles = [];
+const gridAnglesStart = [];
 const gridAnglesSpeedMultiplier = [];
 for(let i = 0; i < (CELLS + 1) * (CELLS + 1); i++) {
     gridAngles.push(2 * Math.PI * random.random());
+    gridAnglesStart.push(2 * Math.PI * random.random());
     gridAnglesSpeedMultiplier.push(random.random());
 }
 
@@ -126,10 +127,9 @@ function fillCell(startX, startY, gridVectors) {
 
             const interpolated = interpolate(topInterpolated, bottomInterpolated, y);
 
-            const colorValue = Math.round((interpolated / 2 + .5) * 360);
+            const colorValue = interpolated * 360;
 
-            // context.fillStyle = `rgb(${colorValue}, ${colorValue}, ${colorValue})`;
-            context.fillStyle = `hsl(${colorValue}, 81%, 81%)`;
+            context.fillStyle = `hsl(${colorValue}, ${HSL_DATA})`;
             context.fillRect(startX + i, startY + j, 1, 1);
         }
     }
@@ -158,22 +158,59 @@ function fillAll() {
 }
 fillAll();
 
+let timePlaying = 0;
+let timeStopped = 0;
+let playing = true;
+
 let previousAnimation = 0;
 function onAnimationFrame(x) {
     const delta = x - previousAnimation;
     previousAnimation = x;
-    
-    for (let i = 0; i < gridAngles.length; i++) {
-        gridAngles[i] += gridAnglesSpeedMultiplier[i] * delta * SPEED;
+
+    if (playing) {
+        timePlaying += delta;
+        for (let i = 0; i < gridAngles.length; i++) {
+            // gridAngles[i] += gridAnglesSpeedMultiplier[i] * delta * SPEED;
+            gridAngles[i] = gridAnglesStart[i] + gridAnglesSpeedMultiplier[i] * timePlaying * SPEED;
+        }
+        fillAll();
+    } else {
+        timeStopped += delta;
     }
-
-    fillAll();
-
-    // if (previousAnimation < 10_000) window.requestAnimationFrame(onAnimationFrame);
-    // else console.log('f');
-    window.requestAnimationFrame(onAnimationFrame);
+    
+    // window.requestAnimationFrame(onAnimationFrame);
 }
 window.requestAnimationFrame(onAnimationFrame);
+
+
+function pausePlaying() {
+    playing = true;
+}
+function resumePlaying() {
+    playing = false;
+}
+
+canvas.onmousedown = _ => {
+    pausePlaying();
+}
+canvas.onmouseup = _ => {
+    resumePlaying();
+}
+if (canvas.ontouchstart) canvas.ontouchstart = _ => {
+    pausePlaying();
+}
+if (canvas.ontouchend) canvas.ontouchend = _ => {
+    resumePlaying();
+}
+
+
+// while(true) {
+//     for (let i = 0; i < gridAngles.length; i++) {
+//         gridAngles[i] += gridAnglesSpeedMultiplier[i] * 20 * SPEED;
+//     }
+
+//     fillAll();
+// }
 
 // setTimeout(() => {
 //     window.location.reload();
