@@ -12,6 +12,7 @@ const PLAY_BUTTON_TEXT = 'Play';
 const PAUSE_BUTTON_TEXT = 'Pause';
 
 const BUTTON_BACK_FORWARD_STEP = 200;
+const SAVE_CANVAS_SIZE = 1000;
 
 class SeededRandom {
     constructor(seed) {
@@ -169,7 +170,7 @@ function fillAll() {
 fillAll();
 
 let timePlaying = 0;
-let timeStopped = 0;
+let timeStopped = 5000; // should be 0
 let timeWhenStopped = -1;
 let playing = true;
 
@@ -247,3 +248,89 @@ document.getElementById('play-time-i-stopped').onclick = _ => {
     fillAllDependingOnTimePlaying();
 }
 
+
+
+function createCanvasToCopyOrDownload() {
+    const newCanvas = document.createElement('canvas');
+    newCanvas.width = SAVE_CANVAS_SIZE;
+    newCanvas.height = SAVE_CANVAS_SIZE;
+    newCanvas.style.width = SAVE_CANVAS_SIZE + 'px';
+    newCanvas.style.height = SAVE_CANVAS_SIZE + 'px';
+    newCanvas.style.display = 'none';
+
+    const newCtx = newCanvas.getContext('2d');
+
+    newCtx.drawImage(
+        canvas, // Assuming this is the smaller canvas with size 100x100
+        0, 0, SIZE, SIZE, // Source rectangle: start at (0,0), covering the entire small canvas
+        0, 0, SAVE_CANVAS_SIZE, SAVE_CANVAS_SIZE // Destination rectangle: scale it to fill the new canvas
+    );
+
+    // drawText
+    {
+        // Draw "some text" at the bottom right
+        const text = '#808080';
+        const fontSize = 50; // Adjust the size as needed
+        newCtx.font = `bold ${fontSize}px Arial`;
+        newCtx.textAlign = 'right';
+        newCtx.textBaseline = 'bottom';
+
+        const xPos = SAVE_CANVAS_SIZE - 20; // 20 pixels from the right edge
+        const yPos = SAVE_CANVAS_SIZE - 20; // 20 pixels from the bottom edge
+
+        // Draw black stroke first
+        newCtx.strokeStyle = 'black';
+        newCtx.lineWidth = 10;
+        newCtx.strokeText(text, xPos, yPos);
+
+        // Draw white fill on top
+        newCtx.fillStyle = 'white';
+        newCtx.fillText(text, xPos, yPos);
+    }
+
+    // document.body.appendChild(newCanvas);
+
+    return newCanvas;
+}
+
+document.getElementById('copy').onclick = _ => {
+    document.getElementById('copy').innerText = 'Copying...';
+    const newCanvas = createCanvasToCopyOrDownload();
+    
+    // Convert the canvas to a Blob (PNG format)
+    newCanvas.toBlob(async blob => {
+        const item = new ClipboardItem({ 'image/png': blob });
+        
+        // Copy the blob to the clipboard
+        await navigator.clipboard.write([item]);
+        
+        console.log('Canvas copied to clipboard');
+
+        document.getElementById('copy').innerText = 'Copied!';
+        setTimeout(() => {
+            document.getElementById('copy').innerText = 'Copy';
+        }, 1000);
+    });
+
+    // newCanvas.remove();
+}
+
+document.getElementById('download').onclick = _ => {
+    const newCanvas = createCanvasToCopyOrDownload();
+
+    // Convert the canvas to a data URL (PNG format)
+    const dataURL = newCanvas.toDataURL('image/png');
+
+    // Create a temporary anchor element
+    const link = document.createElement('a');
+    link.href = dataURL;
+
+    // Generate a filename with the current timePlaying
+    const timePlaying = Math.floor(Date.now() / 1000); // Example: seconds since epoch
+    link.download = `perlin-rgb128-${timePlaying}.png`;
+
+    // Trigger the download
+    link.click();
+
+    // newCanvas.remove();
+}
