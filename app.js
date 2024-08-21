@@ -320,7 +320,7 @@ document.getElementById('copy').onclick = _ => {
         }, 1000);
     });
 
-    // newCanvas.remove();
+    newCanvas.remove();
 }
 
 document.getElementById('download').onclick = _ => {
@@ -340,5 +340,5 @@ document.getElementById('download').onclick = _ => {
     // Trigger the download
     link.click();
 
-    // newCanvas.remove();
+    newCanvas.remove();
 }
