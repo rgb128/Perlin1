@@ -2,7 +2,7 @@
 
 const SIZE = 500;
 const SEED = 30;
-const CELLS = 5; // each side is divided by CELLS (CELLS=2 means we have 4 cells etc)
+const CELLS = 10; // each side is divided by CELLS (CELLS=2 means we have 4 cells etc)
 
 class SeededRandom {
     constructor(seed) {
@@ -35,10 +35,10 @@ function map(num, frombottom, fromtop, tobottom, totop) {
     return a;
 }
 
+// fade function
 function smoothstep(x) {
-    if (x < 0) return 0;
-    if (x > 1) return 1;
-    // return 3 * x * x - 2 * x * x * x;
+    // if (x < 0) return 0;
+    // if (x > 1) return 1;
     return 6 * Math.pow(x, 5) - 15 * Math.pow(x, 4) + 10 * Math.pow(x, 3);
 }
 function interpolate(a, b, x) {
@@ -50,9 +50,6 @@ function interpolate(a, b, x) {
 // Calculate grid vectors
 const gridAngles = [];
 for(let i = 0; i < (CELLS + 1) * (CELLS + 1); i++) {
-    // const angleDeg = 360 * random.random();
-    // const angleRad = angleDeg * Math.PI / 180;
-    // gridAngles.push(angleRad);
     gridAngles.push(2 * Math.PI * random.random());
 }
 
@@ -125,9 +122,7 @@ function fillCell(startX, startY, gridVectors) {
 
             const interpolated = interpolate(topInterpolated, bottomInterpolated, y);
 
-            // const colorValue = Math.round(interpolated * 255);
             const colorValue = Math.round((interpolated / 2 + .5) * 255);
-            // const colorValue = Math.round(Math.abs(interpolated) * 255);
 
             context.fillStyle = `rgb(${colorValue}, ${colorValue}, ${colorValue})`;
             context.fillRect(startX + i, startY + j, 1, 1);
@@ -139,8 +134,8 @@ function fillAll() {
     const cellSize = SIZE / CELLS;
     for (let i = 0; i < CELLS; i++) {
         for (let j = 0; j < CELLS; j++) {
-            const startX = i * cellSize;
-            const startY = j * cellSize;
+            const startY = i * cellSize;
+            const startX = j * cellSize;
 
             const topLeftAngleIndex = i * (CELLS + 1) + j;
             const topRightAngleIndex = topLeftAngleIndex + 1;
@@ -153,7 +148,6 @@ function fillAll() {
                 gridAngles[bottomLeftAngleIndex], 
                 gridAngles[bottomRightAngleIndex],
             ]);
-            // console.log([topLeftAngleIndex, topRightAngleIndex, bottomLeftAngleIndex, bottomRightAngleIndex]);
         }
     }
 }
