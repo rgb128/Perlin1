@@ -5,6 +5,8 @@ const SEED = 10;
 const CELLS = 2; // each side is divided by CELLS (CELLS=2 means we have 4 cells etc)
 const SPEED = .001;
 const HSL_DATA = '96%, 47%';
+const MIN_WAIT_SEC = 1; // 10
+const MAX_WAIT_SEC = 5; // 20
 
 class SeededRandom {
     constructor(seed) {
@@ -27,6 +29,9 @@ const random = new SeededRandom(SEED);
 const context = canvas.getContext('2d');
 canvas.width =  SIZE;
 canvas.height = SIZE;
+
+const waitTimeMs = map(random.random(), 0, 1, MIN_WAIT_SEC, MAX_WAIT_SEC) * 1000;
+console.log('waitTimeMs', waitTimeMs);
 
 function map(num, frombottom, fromtop, tobottom, totop) {
     let a = num - frombottom;
@@ -176,18 +181,21 @@ function onAnimationFrame(x) {
         fillAll();
     } else {
         timeStopped += delta;
+        if (timeStopped > waitTimeMs) {
+            document.getElementById('description').classList.remove('hidden');
+        }
     }
     
-    // window.requestAnimationFrame(onAnimationFrame);
+    window.requestAnimationFrame(onAnimationFrame);
 }
 window.requestAnimationFrame(onAnimationFrame);
 
 
 function pausePlaying() {
-    playing = true;
+    playing = false;
 }
 function resumePlaying() {
-    playing = false;
+    playing = true;
 }
 
 canvas.onmousedown = _ => {
@@ -204,14 +212,3 @@ if (canvas.ontouchend) canvas.ontouchend = _ => {
 }
 
 
-// while(true) {
-//     for (let i = 0; i < gridAngles.length; i++) {
-//         gridAngles[i] += gridAnglesSpeedMultiplier[i] * 20 * SPEED;
-//     }
-
-//     fillAll();
-// }
-
-// setTimeout(() => {
-//     window.location.reload();
-// }, 1000);
