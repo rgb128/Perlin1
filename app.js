@@ -5,7 +5,7 @@ document.getElementById('description').classList.remove('hidden');
 
 const SIZE = 100;
 const SEED = 10;
-const CELLS = 2; // each side is divided by CELLS (CELLS=2 means we have 4 cells etc)
+const CELLS = 3; // each side is divided by CELLS (CELLS=2 means we have 4 cells etc)
 const SPEED = .001;
 const HSL_DATA = '96%, 47%';
 const MIN_WAIT_SEC = 1; // 10
@@ -23,7 +23,9 @@ const TEXT_COLOR = 'white';
 const TEXT_STROKE_COLOR = 'black';
 const TEXT_STROKE_WIDTH = 10;
 
-const BLUR = 100;
+let BLUR = 100;
+const BLUR_MIN = 0;
+const BLUR_MAX = 200;
 
 class SeededRandom {
     constructor(seed) {
@@ -44,10 +46,12 @@ const random = new SeededRandom(SEED);
 
 /** @type HTMLCanvasElement */ const canvas = document.getElementById('canvas');
 canvas.style.filter = `blur(${BLUR}px)`;
+document.getElementById('blur-range').value = BLUR;
+document.getElementById('blur-range').setAttribute('max', BLUR_MAX);
+document.getElementById('blur-range').setAttribute('min', BLUR_MIN);
 const context = canvas.getContext('2d');
 canvas.width =  SIZE;
 canvas.height = SIZE;
-// context.filter = `blur(${BLUR}px)`;
 
 const waitTimeMs = map(random.random(), 0, 1, MIN_WAIT_SEC, MAX_WAIT_SEC) * 1000;
 console.log('waitTimeMs', waitTimeMs);
@@ -305,6 +309,12 @@ function createCanvasToCopyOrDownload() {
     // document.body.appendChild(newCanvas);
 
     return newCanvas;
+}
+
+document.getElementById('blur-range').oninput = _ => {
+    const value = document.getElementById('blur-range').value;
+    BLUR = value;
+    canvas.style.filter = `blur(${BLUR}px)`;
 }
 
 document.getElementById('copy').onclick = _ => {
