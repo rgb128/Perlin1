@@ -7,7 +7,7 @@ const SIZE = 100;
 const SEED = 10;
 const CELLS = 3; // each side is divided by CELLS (CELLS=2 means we have 4 cells etc)
 const SPEED = .001;
-const HSL_DATA = '96%, 47%';
+// const HSL_DATA = '96%, 47%';
 const MIN_WAIT_SEC = 1; // 10
 const MAX_WAIT_SEC = 5; // 20
 
@@ -56,12 +56,7 @@ canvas.height = SIZE;
 const waitTimeMs = map(random.random(), 0, 1, MIN_WAIT_SEC, MAX_WAIT_SEC) * 1000;
 console.log('waitTimeMs', waitTimeMs);
 
-function map(num, frombottom, fromtop, tobottom, totop) {
-    let a = num - frombottom;
-    a *= (totop-tobottom)/(fromtop-frombottom);
-    a += tobottom;
-    return a;
-}
+
 
 // fade function
 function smoothstep(x) {
@@ -154,10 +149,23 @@ function fillCell(startX, startY, gridVectors) {
             const bottomInterpolated = interpolate(dotProductBottomLeft, dotProductBottomRight, x);
 
             const interpolated = interpolate(topInterpolated, bottomInterpolated, y);
+            const color = getColor(interpolated / 2 + .5); // interpolated is [-1..1], position is [0..1]
 
-            const colorValue = interpolated * 360;
+            // const colorValue = interpolated * 360; // interpolated is -1..1
+            // const colorValue = map(interpolated, -1, 1, -360, 360); // interpolated is -1..1
+            // console.log(interpolated);
+            // console.log(
+            //     interpolated < -1,
+            //     interpolated >= -1  && interpolated < -.5,
+            //     interpolated >= -.5 && interpolated < 0,
+            //     interpolated >= 0   && interpolated < 0.5,
+            //     interpolated >= .5  && interpolated < 1,
+            //     interpolated >= 1
+            // );
+            // if (interpolated >= 1) console.log('dddd');
 
-            context.fillStyle = `hsl(${colorValue}, ${HSL_DATA})`;
+            // context.fillStyle = `hsl(${colorValue}, ${HSL_DATA})`;
+            context.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`;
             context.fillRect(startX + i, startY + j, 1, 1);
         }
     }
