@@ -4,9 +4,9 @@
 document.getElementById('description').classList.remove('hidden');
 
 const SIZE = 100;
-const SEED = 10;
+const SEED = 10; // todo think about this
 const CELLS = 3; // each side is divided by CELLS (CELLS=2 means we have 4 cells etc)
-const SPEED = .001;
+const SPEED = STYLES[STYLE_ID].speed;
 // const HSL_DATA = '96%, 47%';
 const MIN_WAIT_SEC = 1; // 10
 const MAX_WAIT_SEC = 5; // 20
@@ -23,7 +23,7 @@ const TEXT_COLOR = 'white';
 const TEXT_STROKE_COLOR = 'black';
 const TEXT_STROKE_WIDTH = 10;
 
-let BLUR = 100;
+let BLUR = STYLES[STYLE_ID].defaultBlur;
 const BLUR_MIN = 0;
 const BLUR_MAX = 200;
 
@@ -55,6 +55,9 @@ canvas.height = SIZE;
 
 const waitTimeMs = map(random.random(), 0, 1, MIN_WAIT_SEC, MAX_WAIT_SEC) * 1000;
 console.log('waitTimeMs', waitTimeMs);
+
+document.getElementById('palette-styles').setAttribute('href', STYLES[STYLE_ID].stylesPath);
+document.getElementById('container').style.backgroundColor = STYLES[STYLE_ID].backgroundColor;
 
 
 
@@ -285,6 +288,10 @@ function createCanvasToCopyOrDownload() {
     newCanvas.style.display = 'none';
     
     const newCtx = newCanvas.getContext('2d');
+
+    newCtx.fillStyle = STYLES[STYLE_ID].backgroundColor;
+    newCtx.fillRect(0, 0, SAVE_CANVAS_SIZE, SAVE_CANVAS_SIZE);
+    
     newCtx.filter = `blur(${BLUR}px)`;
     
     newCtx.drawImage(

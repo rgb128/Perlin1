@@ -1,40 +1,74 @@
 'use strict';
 
+const STYLE_ID = 1; // todo random
+
+const STYLES = [
+    {
+        backgroundColor: 'white',
+        speed: .001,
+        defaultBlur: 100,
+        stylesPath: 'style-1.css',
+        palette: [
+            {
+                position: 0.0,
+                r: 255,
+                g: 255,
+                b: 255,
+            },
+            {
+                position: (1/6),
+                r: 0,
+                g: 0,
+                b: 255,
+            },
+            {
+                position: .25,
+                r: 255,
+                g: 0,
+                b: 0,
+            },
+            {
+                position: .5,
+                r: 0,
+                g: 255,
+                b: 0,
+            },
+            {
+                position: 1.0,
+                r: 0,
+                g: 0,
+                b: 0,
+            },
+        ],
+    },
+    {
+        backgroundColor: 'red',
+        speed: .01,
+        defaultBlur: 300,
+        stylesPath: 'style-2.css',
+        palette: [
+            {
+                position: 0.0,
+                r: 255,
+                g: 255,
+                b: 255,
+            },
+            {
+                position: 1,
+                r: 0,
+                g: 0,
+                b: 0,
+            },
+        ],
+    },
+];
+
 // It MUST have position = 0 and position = 1
-const COLOR_PALETTE = [
-    {
-        position: 0.0,
-        r: 255,
-        g: 255,
-        b: 255,
-    },
-    {
-        position: (1/6),
-        r: 0,
-        g: 0,
-        b: 255,
-    },
-    {
-        position: .25,
-        r: 255,
-        g: 0,
-        b: 0,
-    },
-    {
-        position: .5,
-        r: 0,
-        g: 255,
-        b: 0,
-    },
-    {
-        position: 1.0,
-        r: 0,
-        g: 0,
-        b: 0,
-    },
-]
+const COLOR_PALETTE = STYLES[STYLE_ID]
+.palette
 .filter(filterColorPaletteFunc)
 .sort(sortColorPaletteFunc);
+
 
 if (!COLOR_PALETTE.find(x => x.position === 0)) throw new Error('COLOR PALETTE MUST HAVE position=0');
 if (!COLOR_PALETTE.find(x => x.position === 1)) throw new Error('COLOR PALETTE MUST HAVE position=1');
