@@ -177,9 +177,9 @@ function fillCell(startX, startY, gridVectors) {
 function fillAll() {
     const cellSize = SIZE / CELLS;
     for (let i = 0; i < CELLS; i++) {
-        for (let j = 0; j < CELLS; j++) {
+        for (let j = 0; j < CELLS / 2; j++) {  // Draw only half (left side)
             const startY = i * cellSize;
-            const startX = j * cellSize;
+            const startX = j * cellSize - 18;
 
             const topLeftAngleIndex = i * (CELLS + 1) + j;
             const topRightAngleIndex = topLeftAngleIndex + 1;
@@ -194,6 +194,13 @@ function fillAll() {
             ]);
         }
     }
+
+    // Mirror the right side
+    context.save();
+    context.translate(SIZE, 0);
+    context.scale(-1, 1); // Mirror across the Y-axis
+    context.drawImage(canvas, 0, 0);
+    context.restore();
 }
 fillAll();
 
